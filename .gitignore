@@ -1,0 +1,8 @@
+build/
+build_posix/
+
+# VSCode
+.vscode/ipch
+*.code-workspace
+
+*.log
