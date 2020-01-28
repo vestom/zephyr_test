@@ -12,6 +12,7 @@
 #include "ConsoleThread.hpp"
 
 #ifdef __linux__
+// Workaround for when running 'native_posix_64' build
 extern "C" void __cxa_pure_virtual() { while (1); }
 #endif
 
@@ -24,8 +25,13 @@ K_THREAD_STACK_DEFINE(stack_2, 1024);
 SerialThread    serialThread;
 ConsoleThread   consoleThread;
 
-#define LED0_PORT   "GPIOC"
-#define LED0_PIN    13
+// STM32F103 Bluepill
+//#define LED0_PORT   "GPIOC"
+//#define LED0_PIN    13
+// STM32F4_DISCOVERY
+#define LED0_PORT   DT_ALIAS_LED0_GPIOS_CONTROLLER
+#define LED0_PIN    DT_ALIAS_LED0_GPIOS_PIN
+
 TF::GPIO    gpio_led(LED0_PORT, LED0_PIN);
 
 extern "C" int main()
@@ -33,20 +39,28 @@ extern "C" int main()
 {
     TF::Log::setLogDebug(false);
     printf("Build: %s %s\n", __DATE__, __TIME__);
-//    printf("Port: %s, Pin: %i\n", DT_ALIAS_LED0_GPIOS_CONTROLLER, DT_ALIAS_LED0_GPIOS_PIN);
-//    mc.test();
+
+    printf("LED0 Port: %s, Pin: %i\n", DT_ALIAS_LED0_GPIOS_CONTROLLER, DT_ALIAS_LED0_GPIOS_PIN);
 
 
 #ifdef __ZEPHYR__
-    serialThread.start(stack_1, K_THREAD_STACK_SIZEOF(stack_1));
+//    serialThread.start(stack_1, K_THREAD_STACK_SIZEOF(stack_1));
     consoleThread.start(stack_2, K_THREAD_STACK_SIZEOF(stack_2));
 #else
-    serialThread.start();
+//    serialThread.start();
     consoleThread.start();
 #endif
-//    char *lineptr = NULL;
-//    size_t linelen = 0;
-#include "TF/Event.h"
+
+/////////// Benchmark
+    TF::Timer tic;
+    char s[100];
+    for (int n=0; n<1000; n++) {
+        sprintf(s, "Print med format %u\n",n);
+    }
+    auto toc = tic.get_elapsed_ms();
+    printf("%s", s);
+    printf("Time: %lu ms\n", toc);
+//////////
 
     bool led = false;
     while(1) {
