@@ -20,7 +20,7 @@ extern "C" void __cxa_pure_virtual() { while (1); }
 #endif
 
 K_THREAD_STACK_DEFINE(stack_1, 1024);
-K_THREAD_STACK_DEFINE(stack_2, 512);
+K_THREAD_STACK_DEFINE(stack_2, 1024);
 SerialThread    serialThread;
 ConsoleThread   consoleThread;
 
@@ -46,11 +46,13 @@ extern "C" int main()
 #endif
 //    char *lineptr = NULL;
 //    size_t linelen = 0;
+#include "TF/Event.h"
 
     bool led = false;
     while(1) {
         gpio_led.set(led);
         led = !led;
+        if(consoleThread.event.is_set())  { consoleThread.event.wait(); printf("Got event!\n"); }
         TF::Thread::sleep_ms(300);
     }
 

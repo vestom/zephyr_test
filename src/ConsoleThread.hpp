@@ -1,6 +1,7 @@
 #include "TF/Log.h"
 #include "TF/Thread.h"
 #include "TF/Timer.h"
+#include "TF/Event.h"
 #include <string.h>
 
 // Abstract zephyr specific console functions
@@ -22,6 +23,7 @@ class ConsoleThread : public TF::Thread {
             ic = getchar();
             switch(ic) {
                 case 'c':   cmdCpuStats(); break;
+                case 'e':   cmdEvent(); break;
                 case 'h':   cmdHelp(); break;
                 case 'l':   cmdLoad(); break;
                 default:    printf("Unknown command: %c\n", ic);
@@ -34,6 +36,7 @@ class ConsoleThread : public TF::Thread {
     void cmdHelp() {
         printf("Console commands:\n");
         printf("c = CPU stats\n");
+        printf("e = Event\n");
         printf("h = Help\n");
         printf("l = Load CPU for 1 sek\n");
         printf("\n");
@@ -53,6 +56,10 @@ class ConsoleThread : public TF::Thread {
         cpu_stats_reset_counters();
     }
 
+    void cmdEvent() {
+        event.set();
+    }
+
     void cmdLoad() {
         volatile int i=0;
         TF::Timer timer(1000);
@@ -60,6 +67,9 @@ class ConsoleThread : public TF::Thread {
         while(!timer.is_expired()) { i++; }
         printf("Done!\n");
     }
+
+public:
+    TF::Event event;
 
 
 #if 0

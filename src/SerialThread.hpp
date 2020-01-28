@@ -18,7 +18,7 @@ class SerialThread : public TF::Thread {
         while(1) {
             TF::Thread::sleep_ms(500);
             // TX
-            sprintf(tx_buffer, "Testing %2i", n++);
+            snprintf(tx_buffer, sizeof(tx_buffer), "Testing %2i", n++);
             TF::Log::debug("Sending: %s", tx_buffer);
             serial.write((uint8_t*) tx_buffer, strlen(tx_buffer));
             TF::Thread::sleep_ms(10);
@@ -30,7 +30,7 @@ class SerialThread : public TF::Thread {
 
                 // Bin2Hex
                 for (int n=0; n<bytes; ++n) {
-                    sprintf(str+n*3, "%02X ", (unsigned)rx_buffer[n]);
+                    snprintf(str+n*2, sizeof(str)-n*2, "%02X ", (unsigned)rx_buffer[n]);
                 }
                 TF::Log::debug("Received: %s, [%u] %s", rx_buffer, bytes, str);
             }
