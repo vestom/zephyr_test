@@ -1,10 +1,13 @@
 #include "TF/Log.h"
 #include "TF/Thread.h"
-#include "TF/Timer.h"
+#include "TF/Time.h"
 #include "TF/Event.h"
 #include "TF/Mutex.h"
 #include "TF/Zephyr/zephyr_extras.h"
 #include <string.h>
+#include <debug/tracing.h>
+#include <console/console.h>
+#include <ctype.h>
 
 //// Helpers Begin
 
@@ -98,9 +101,9 @@ private:
 
     void cmdLoad() {
         volatile int i=0;
-        TF::Timer timer(1000);
+        TF::Time time(1000);
         printf("*Loading CPU... ");
-        while(!timer.is_expired()) { i++; }
+        while(!time.is_expired()) { i++; }
         printf("*Done!\n");
     }
 
@@ -108,18 +111,11 @@ private:
         printf("*Received param: %s\n", param);
         const char str[] = "*Test print of long sentence..\n";
 //        size_t len = sizeof(str);
-        TF::Timer timer(0);
+        TF::Time time(0);
         printf(str);
 //        console_write(NULL, str, len);
-        unsigned time = timer.get_elapsed_ms();
-        printf("*Time spent: %u ms\n", time);
+        unsigned elapsed = time.get_elapsed_ms();
+        printf("*Time spent: %u ms\n", elapsed);
     }
-
-
-#if 0
-//#ifdef __linux__
-    public:
-        void operator delete(void* v) {};
-#endif
 };
 
