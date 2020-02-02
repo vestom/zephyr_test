@@ -44,13 +44,13 @@ extern "C" int main()
     printf("Build: %s %s\n", __DATE__, __TIME__);
 
     printf("LED0 Port: %s, Pin: %i\n", DT_ALIAS_LED0_GPIOS_CONTROLLER, DT_ALIAS_LED0_GPIOS_PIN);
-
+    printf("LED2 Port: %s, Pin: %i\n", DT_ALIAS_LED2_GPIOS_CONTROLLER, DT_ALIAS_LED2_GPIOS_PIN);
 
 #ifdef __ZEPHYR__
-//    serialThread.start(stack_1, K_THREAD_STACK_SIZEOF(stack_1));
+    serialThread.start(stack_1, K_THREAD_STACK_SIZEOF(stack_1));  //, TF::Thread::Priority::HIGH);
     consoleThread.start(stack_2, K_THREAD_STACK_SIZEOF(stack_2));
 #else
-//    serialThread.start();
+    serialThread.start();
     consoleThread.start();
 #endif
 
@@ -65,10 +65,8 @@ extern "C" int main()
     printf("Time: %lu ms\n", elapsed);
 //////////
 
-    bool led = false;
     while(1) {
-        gpio_led.set(led);
-        led = !led;
+        gpio_led.set(!gpio_led.get());
         if(consoleThread.event.is_set())  { consoleThread.event.wait(); printf("Got event!\n"); }
         TF::Thread::sleep_ms(300);
     }

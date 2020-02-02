@@ -4,6 +4,10 @@
 #include "TF/Time.h"
 #include <string.h>
 
+#define LED2_PORT   DT_ALIAS_LED2_GPIOS_CONTROLLER
+#define LED2_PIN    DT_ALIAS_LED2_GPIOS_PIN
+#define SERIAL_UART "UART_1"
+
 class SerialThread : public TF::Thread {
     void run() {
         char tx_buffer[32];
@@ -13,10 +17,12 @@ class SerialThread : public TF::Thread {
 
         TF::Log::debug("SerialThread");
 
-        serial.open("UART_2", 115200);
+        serial.open(SERIAL_UART, 115200);
         serial.flushRxBuffer();
 
-        run_period.set_timeout_ms(10);  // 100Hz
+        auto gpio_led = TF::GPIO(LED2_PORT, LED2_PIN);
+
+        run_period.set_timeout_ms(100);  // 10Hz
         run_period.reset();
 
         while(1) {
@@ -26,6 +32,8 @@ class SerialThread : public TF::Thread {
                 TF::Thread::sleep_ms(run_period.get_remaining_ms());
             }
             run_period.reset();
+
+            gpio_led.set(!gpio_led.get());
 
             // RX
             int bytes = serial.getRxBytes();
@@ -41,7 +49,7 @@ class SerialThread : public TF::Thread {
             }
 
             // TX
-            snprintf(tx_buffer, sizeof(tx_buffer), "Testing %2i", n++);
+            snprintf(tx_buffer, sizeof(tx_buffer), "Test %2i", n++);
             TF::Log::debug("Sending: %s", tx_buffer);
             serial.write((uint8_t*) tx_buffer, strlen(tx_buffer));
         }
@@ -51,7 +59,6 @@ class SerialThread : public TF::Thread {
     }
 
     TF::Serial serial;
-
     TF::Time run_period;
 
 #if 0

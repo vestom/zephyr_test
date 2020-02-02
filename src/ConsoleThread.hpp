@@ -90,10 +90,10 @@ private:
         uint64_t l_idle   = 1000ULL * (stats.idle) / allticks;
         uint64_t l_nidle  = 1000ULL * (stats.non_idle) / allticks;
         uint64_t l_sched  = 1000ULL * (stats.sched) / allticks;
+//        printf("*CPU stats: Idle %u, Non-Idle %u, Sched %u\n",
+//            (unsigned)stats.idle, (unsigned)stats.non_idle, (unsigned)stats.sched);
         printf("*CPU stats: Idle %.1f %%, Non-Idle %.1f %%, Sched %.1f %%\n",
             0.1*l_idle, 0.1*l_nidle, 0.1*l_sched);
-        //printf("CPU stats: Idle %u, Non-Idle %u, Sched %u\n",
-        //    (unsigned)stats.idle, (unsigned)stats.non_idle, (unsigned)stats.sched);
         cpu_stats_reset_counters();
     }
 
