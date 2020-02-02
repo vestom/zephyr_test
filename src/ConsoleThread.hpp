@@ -59,6 +59,7 @@ private:
             else if    (startsWith(str_input, "e"))  { cmdEvent(); }
             else if    (startsWith(str_input, "h"))  { cmdHelp(); }
             else if    (startsWith(str_input, "l"))  { cmdLoad(); }
+            else if    (startsWith(str_input, "s"))  { cmdStatistics(); }
             else if ((s=startsWith(str_input, "t"))) { cmdTest(s); }
             else    { printf("*Error! 'h' for help\n"); }
             printMutex.unlock();
@@ -72,6 +73,7 @@ private:
         printf("* e = Event\n");
         printf("* h = Help\n");
         printf("* l = Load CPU for 1 sek\n");
+        printf("* s = Thread statistics\n");
         printf("* t <parm> = Test\n");
     }
 
@@ -105,6 +107,11 @@ private:
         printf("*Loading CPU... ");
         while(!time.is_expired()) { i++; }
         printf("*Done!\n");
+    }
+
+    void cmdStatistics(void) {
+        printf("*Thread max run time\n");
+        printf("*  SerialThread = %lu ms\n", maxThreadRunTime);
     }
 
     void cmdTest(const char *param) {

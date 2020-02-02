@@ -5,9 +5,11 @@
 #include "TF/Log.h"
 #include "TF/Serial.h"
 #include "TF/Thread.h"
+#include "TF/Time.h"
 #include "TF/GPIO.h"
 
 //#include "MyClass.hpp"
+TF::TimeStamp   maxThreadRunTime=0;     // Ugly global for test...
 #include "SerialThread.hpp"
 #include "ConsoleThread.hpp"
 

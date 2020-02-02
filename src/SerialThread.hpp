@@ -21,7 +21,7 @@ class SerialThread : public TF::Thread {
 
         while(1) {
             // Periodic loop
-            statistics.maxRunTime = MAX(statistics.maxRunTime, run_period.get_elapsed_ms());
+            maxThreadRunTime = MAX(maxThreadRunTime, run_period.get_elapsed_ms());
             while(run_period.get_remaining_ms() > 0) {
                 TF::Thread::sleep_ms(run_period.get_remaining_ms());
             }
@@ -53,11 +53,6 @@ class SerialThread : public TF::Thread {
     TF::Serial serial;
 
     TF::Time run_period;
-    class Statistics {
-    public:
-        TF::TimeStamp   maxRunTime;
-
-    } statistics;
 
 #if 0
 //#ifdef __linux__
