@@ -8,7 +8,7 @@ public:
     }
 
     void test() {
-        printf("MyClass.try()\n");
+        printf("MyClass.test()\n");
     }
 };
 

@@ -45,7 +45,8 @@ class SerialThread : public TF::Thread {
                 for (int n=0; n<bytes; ++n) {
                     snprintf(str+n*2, sizeof(str)-n*2, "%02X ", (unsigned)rx_buffer[n]);
                 }
-                TF::Log::debug("Received: %s, [%u] %s", rx_buffer, bytes, str);
+                //TF::Log::debug("Received: %s, [%u] %s", rx_buffer, bytes, str);
+                TF::Log::debug("Received: %s, [%u]", rx_buffer, bytes);
             }
 
             // TX

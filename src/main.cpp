@@ -20,7 +20,7 @@ K_THREAD_STACK_DEFINE(stack_1, 1024);
 K_THREAD_STACK_DEFINE(stack_2, 1024);
 
 #ifdef __linux__
-// Workaround for when running 'native_posix_64' build
+// Workaround for when running Zephyr 'native_posix_64' build (why?!)
 extern "C" void __cxa_pure_virtual() { while (1); }
 #endif
 #endif
@@ -67,7 +67,10 @@ extern "C" int main()
 
     while(1) {
         gpio_led.set(!gpio_led.get());
-        if(consoleThread.event.is_set())  { consoleThread.event.wait(); printf("Got event!\n"); }
+        if(consoleThread.event.is_set())  {
+            consoleThread.event.wait();
+            printf("Got event!\n");
+        }
         TF::Thread::sleep_ms(300);
     }
 
