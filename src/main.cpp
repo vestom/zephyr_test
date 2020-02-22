@@ -8,17 +8,16 @@
 #include "TF/Time.h"
 #include "TF/GPIO.h"
 
-//#include "MyClass.hpp"
-TF::TimeStamp   maxThreadRunTime=0;     // Ugly global for test...
-#include "SerialThread.hpp"
-#include "ConsoleThread.hpp"
-
-
 #ifdef __ZEPHYR__
 #include <zephyr.h>
 K_THREAD_STACK_DEFINE(stack_1, 1024);
 K_THREAD_STACK_DEFINE(stack_2, 1024);
 #endif
+
+//#include "MyClass.hpp"
+TF::TimeStamp   maxThreadRunTime=0;     // Ugly global for test...
+#include "SerialThread.hpp"
+#include "ConsoleThread.hpp"
 
 SerialThread    serialThread;
 ConsoleThread   consoleThread;
@@ -42,6 +41,10 @@ extern "C" int main()
     printf("LED2 Port: %s, Pin: %i\n", DT_ALIAS_LED2_GPIOS_CONTROLLER, DT_ALIAS_LED2_GPIOS_PIN);
 
 #ifdef __ZEPHYR__
+    memset(stack_1, 0xA5, K_THREAD_STACK_SIZEOF(stack_1));  // Fill for debug
+    memset(stack_2, 0xA5, K_THREAD_STACK_SIZEOF(stack_2));  // Fill for debug
+    printf("stack_1 %p size: %u\n", stack_1, K_THREAD_STACK_SIZEOF(stack_1));
+    printf("stack_2 %p size: %u\n", stack_2, K_THREAD_STACK_SIZEOF(stack_2));
     serialThread.start(stack_1, K_THREAD_STACK_SIZEOF(stack_1));  //, TF::Thread::Priority::HIGH);
     consoleThread.start(stack_2, K_THREAD_STACK_SIZEOF(stack_2));
 #else

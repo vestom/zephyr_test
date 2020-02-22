@@ -6,12 +6,35 @@
 #include "TF/Zephyr/zephyr_extras.h"
 #include <string.h>
 #include <console/console.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 // Use of tracing require a Zephyr fix to declare functions 'extern "C" {}'
 #include <debug/tracing.h>
 
 //// Helpers Begin
+
+// Pretty print of a block of memory
+void printMem(void *p, size_t s) {
+    static const int WIDTH = 32;
+    int row=0, col=0, columns;
+    int rows = (s+WIDTH-1)/WIDTH;   // Round up
+    char c;
+    for(row=0; row<rows; row++) {
+        printf("*%10p : ", (char*)p+row*WIDTH);
+        columns = MIN(WIDTH, s-row*WIDTH);
+        for (col=0; col<columns; ++col) {
+            printf("%02X", ((char*)p)[row*WIDTH+col]);
+        }
+        printf(" [");
+        for (col=0; col<columns; ++col) {
+            c = ((char*)p)[row*WIDTH+col];
+            c = (isprint(c) ? c : '.');
+            printf("%c", c);
+        }
+        printf("]\n");
+    }
+}
 
 // Test if string starts with pre string
 // Returns pointer to next character or NULL if not found
@@ -45,7 +68,7 @@ public:
     TF::Mutex printMutex;
 
 private:
-    char str_input[16];     // Object variable to hold string to parse
+    char str_input[32];     // Object variable to hold string to parse
 
     void run() {
         TF::Log::debug("ConsoleThread");
@@ -56,14 +79,15 @@ private:
             fgets(str_input, sizeof(str_input), stdin);
             printMutex.lock();
             printf("*%s", str_input);
-            if         (startsWith(str_input, "c"))  { cmdCpuStats(); }
-            else if    (startsWith(str_input, "d"))  { cmdDebug(); }
-            else if    (startsWith(str_input, "e"))  { cmdEvent(); }
-            else if    (startsWith(str_input, "h"))  { cmdHelp(); }
-            else if    (startsWith(str_input, "l"))  { cmdLoad(); }
-            else if ((s=startsWith(str_input, "m"))) { cmdMemTest(s); }
-            else if    (startsWith(str_input, "s"))  { cmdStatistics(); }
-            else if ((s=startsWith(str_input, "t"))) { cmdTest(s); }
+            if         (startsWith(str_input, "cl"))  { cmdCpuLoad(); }
+            else if    (startsWith(str_input, "cs"))  { cmdCpuStats(); }
+            else if    (startsWith(str_input, "d"))   { cmdDebug(); }
+            else if    (startsWith(str_input, "e"))   { cmdEvent(); }
+            else if    (startsWith(str_input, "h"))   { cmdHelp(); }
+            else if ((s=startsWith(str_input, "md"))) { cmdMemDisplay(s); }
+            else if ((s=startsWith(str_input, "mt"))) { cmdMemTest(s); }
+            else if    (startsWith(str_input, "s"))   { cmdStatistics(); }
+            else if ((s=startsWith(str_input, "t")))  { cmdTest(s); }
             else    { printf("*Error! 'h' for help\n"); }
             printMutex.unlock();
         }
@@ -71,20 +95,23 @@ private:
 
     void cmdHelp() {
         printf("*Console commands:\n");
-        printf("* c = CPU stats\n");
+        printf("* cl = Load CPU for 1 sec\n");
+        printf("* cs = CPU stats\n");
         printf("* d = Debug on/off\n");
         printf("* e = Event\n");
         printf("* h = Help\n");
-        printf("* l = Load CPU for 1 sec\n");
-        printf("* m <size> = Test memory allocation\n");
+        printf("* md <addr> [<size>] = Display memory\n");
+        printf("* mt <size> = Test memory allocation\n");
         printf("* s = Thread statistics\n");
         printf("* t <parm> = Test\n");
     }
 
-    void cmdDebug() {
-        bool newstate = !TF::Log::getLogDebug();
-        printf("*Debug %s\n", (newstate ? "Enabled" : "Disabled"));
-        TF::Log::setLogDebug(newstate);
+    void cmdCpuLoad() {
+        volatile int i=0;
+        TF::Time time(1000);
+        printf("*Loading CPU... ");
+        while(!time.is_expired()) { i++; }
+        printf("*Done!\n");
     }
 
     void cmdCpuStats() {
@@ -103,16 +130,23 @@ private:
 */
     }
 
+    void cmdDebug() {
+        bool newstate = !TF::Log::getLogDebug();
+        printf("*Debug %s\n", (newstate ? "Enabled" : "Disabled"));
+        TF::Log::setLogDebug(newstate);
+    }
+
     void cmdEvent() {
         event.set();
     }
 
-    void cmdLoad() {
-        volatile int i=0;
-        TF::Time time(1000);
-        printf("*Loading CPU... ");
-        while(!time.is_expired()) { i++; }
-        printf("*Done!\n");
+    void cmdMemDisplay(const char *param) {
+        char *str;
+        void* p = (void*)strtoul(param, &str, 0); // Get address
+        size_t s = strtoul(str, &str, 0);   // Get size
+        s = (s ? s : 256);  // Default size
+        printf("*Memory @ %p, size: %u...\n", p, s);
+        printMem(p, s);
     }
 
     class Test {
@@ -125,15 +159,11 @@ private:
     void cmdMemTest(const char *param) {
         int size = atoi(param);
         printf("*Allocating %i bytes...\n", size);
-    #ifdef TF_ZEPHYR_DYNAMIC_MEMORY
         char* str = (char*) malloc(size);
         if(!str) printf("* malloc(%i) failed!\n", size);
         free(str);
         Test *p = new Test;
         delete p;
-    #else
-        printf("* Dynamic memory not enabled!\n");
-    #endif
     }
 
     void cmdStatistics(void) {
