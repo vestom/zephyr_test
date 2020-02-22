@@ -5,9 +5,11 @@
 #include "TF/Mutex.h"
 #include "TF/Zephyr/zephyr_extras.h"
 #include <string.h>
-#include <debug/tracing.h>
 #include <console/console.h>
 #include <ctype.h>
+
+// Use of tracing require a Zephyr fix to declare functions 'extern "C" {}'
+#include <debug/tracing.h>
 
 //// Helpers Begin
 
@@ -59,6 +61,7 @@ private:
             else if    (startsWith(str_input, "e"))  { cmdEvent(); }
             else if    (startsWith(str_input, "h"))  { cmdHelp(); }
             else if    (startsWith(str_input, "l"))  { cmdLoad(); }
+            else if ((s=startsWith(str_input, "m"))) { cmdMemTest(s); }
             else if    (startsWith(str_input, "s"))  { cmdStatistics(); }
             else if ((s=startsWith(str_input, "t"))) { cmdTest(s); }
             else    { printf("*Error! 'h' for help\n"); }
@@ -72,7 +75,8 @@ private:
         printf("* d = Debug on/off\n");
         printf("* e = Event\n");
         printf("* h = Help\n");
-        printf("* l = Load CPU for 1 sek\n");
+        printf("* l = Load CPU for 1 sec\n");
+        printf("* m <size> = Test memory allocation\n");
         printf("* s = Thread statistics\n");
         printf("* t <parm> = Test\n");
     }
@@ -84,6 +88,7 @@ private:
     }
 
     void cmdCpuStats() {
+/* This function only works with C++ fix in zephyr
         struct cpu_stats stats;
         cpu_stats_get_ns(&stats);
         uint64_t allticks = (stats.idle+stats.sched+stats.non_idle);
@@ -95,6 +100,7 @@ private:
         printf("*CPU stats: Idle %.1f %%, Non-Idle %.1f %%, Sched %.1f %%\n",
             0.1*l_idle, 0.1*l_nidle, 0.1*l_sched);
         cpu_stats_reset_counters();
+*/
     }
 
     void cmdEvent() {
@@ -107,6 +113,27 @@ private:
         printf("*Loading CPU... ");
         while(!time.is_expired()) { i++; }
         printf("*Done!\n");
+    }
+
+    class Test {
+    public:
+        Test() { printf("* %s\n", __PRETTY_FUNCTION__); }
+        ~Test() { printf("* %s\n", __PRETTY_FUNCTION__); }
+        char str[64];
+    };
+
+    void cmdMemTest(const char *param) {
+        int size = atoi(param);
+        printf("*Allocating %i bytes...\n", size);
+    #ifdef TF_ZEPHYR_DYNAMIC_MEMORY
+        char* str = (char*) malloc(size);
+        if(!str) printf("* malloc(%i) failed!\n", size);
+        free(str);
+        Test *p = new Test;
+        delete p;
+    #else
+        printf("* Dynamic memory not enabled!\n");
+    #endif
     }
 
     void cmdStatistics(void) {

@@ -46,12 +46,12 @@ class SerialThread : public TF::Thread {
                     snprintf(str+n*2, sizeof(str)-n*2, "%02X ", (unsigned)rx_buffer[n]);
                 }
                 //TF::Log::debug("Received: %s, [%u] %s", rx_buffer, bytes, str);
-                TF::Log::debug("Received: %s, [%u]", rx_buffer, bytes);
+                //TF::Log::debug("Received: %s, [%u]", rx_buffer, bytes);
             }
 
             // TX
             snprintf(tx_buffer, sizeof(tx_buffer), "Test %2i", n++);
-            TF::Log::debug("Sending: %s", tx_buffer);
+            //TF::Log::debug("Sending: %s", tx_buffer);
             serial.write((uint8_t*) tx_buffer, strlen(tx_buffer));
         }
         // Test queue
