@@ -17,7 +17,10 @@ class SerialThread : public TF::Thread {
 
         TF::Log::debug("SerialThread");
 
-        serial.open(SERIAL_UART, 115200);
+        if(!serial.open(SERIAL_UART, 115200)) {
+            TF::Log::error("Could not open Serial port - Exiting!");
+            return;
+        }
         serial.flushRxBuffer();
 
         auto gpio_led = TF::GPIO(LED2_PORT, LED2_PIN);

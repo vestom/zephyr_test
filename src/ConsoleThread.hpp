@@ -10,7 +10,7 @@
 #include <ctype.h>
 
 // Use of tracing require a Zephyr fix to declare functions 'extern "C" {}'
-#include <debug/tracing.h>
+#include <tracing/tracing.h>
 
 //// Helpers Begin
 

@@ -25,9 +25,9 @@ ConsoleThread   consoleThread;
 // STM32F103 Bluepill
 //#define LED0_PORT   "GPIOC"
 //#define LED0_PIN    13
-// STM32F4_DISCOVERY
-#define LED0_PORT   DT_ALIAS_LED0_GPIOS_CONTROLLER
-#define LED0_PIN    DT_ALIAS_LED0_GPIOS_PIN
+// Devicetree
+#define LED0_PORT   DT_GPIO_LABEL(DT_ALIAS(led0), gpios)
+#define LED0_PIN    DT_GPIO_PIN(DT_ALIAS(led0), gpios)
 
 auto gpio_led = TF::GPIO(LED0_PORT, LED0_PIN);
 
@@ -37,8 +37,8 @@ extern "C" int main()
     TF::Log::setLogDebug(false);
     printf("Build: %s %s\n", __DATE__, __TIME__);
 
-    printf("LED0 Port: %s, Pin: %i\n", DT_ALIAS_LED0_GPIOS_CONTROLLER, DT_ALIAS_LED0_GPIOS_PIN);
-    printf("LED2 Port: %s, Pin: %i\n", DT_ALIAS_LED2_GPIOS_CONTROLLER, DT_ALIAS_LED2_GPIOS_PIN);
+    printf("LED0 Port: %s, Pin: %i\n", DT_GPIO_LABEL(DT_ALIAS(led0), gpios), DT_GPIO_PIN(DT_ALIAS(led0), gpios));
+//    printf("LED2 Port: %s, Pin: %i\n", DT_GPIO_LABEL(DT_ALIAS(led2), gpios), DT_GPIO_PIN(DT_ALIAS(led2), gpios));
 
 #ifdef __ZEPHYR__
     memset(stack_1, 0xA5, K_THREAD_STACK_SIZEOF(stack_1));  // Fill for debug
