@@ -4,8 +4,8 @@
 #include "TF/Time.h"
 #include <string.h>
 
-#define LED2_PORT   DT_ALIAS_LED2_GPIOS_CONTROLLER
-#define LED2_PIN    DT_ALIAS_LED2_GPIOS_PIN
+#define LED2_PORT   DT_GPIO_LABEL(DT_ALIAS(led2), gpios)
+#define LED2_PIN    DT_GPIO_PIN(DT_ALIAS(led2), gpios)
 #define SERIAL_UART "UART_1"
 
 class SerialThread : public TF::Thread {
@@ -49,11 +49,11 @@ class SerialThread : public TF::Thread {
                     snprintf(str+n*2, sizeof(str)-n*2, "%02X ", (unsigned)rx_buffer[n]);
                 }
                 //TF::Log::debug("Received: %s, [%u] %s", rx_buffer, bytes, str);
-                //TF::Log::debug("Received: %s, [%u]", rx_buffer, bytes);
+                TF::Log::debug("Received: %s, [%u]", rx_buffer, bytes);
             }
 
             // TX
-            snprintf(tx_buffer, sizeof(tx_buffer), "Test %2i", n++);
+            snprintf(tx_buffer, sizeof(tx_buffer), "Test %2i\n", n++);
             //TF::Log::debug("Sending: %s", tx_buffer);
             serial.write((uint8_t*) tx_buffer, strlen(tx_buffer));
         }
